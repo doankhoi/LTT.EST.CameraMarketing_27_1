@@ -32,6 +32,15 @@ CTrack::~CTrack()
 
 CTracker::CTracker(float _dt, float _Accel_noise_mag, double _dist_thres, int _maximum_allowed_skipped_frames,int _max_trace_length)
 {
+	//>>>Kết nối database
+	db = (this->connectDb).connectDb("D:/Data/IpCam/database/ETSCameraClientCache.db3");
+	SHOP_CD = connectDb.getShopInfo(db);
+	if(SHOP_CD =="")
+	{
+		cout << "店舗コードを設定してください。"<< endl;
+		return;
+	}
+	//<<<Kết nối database
 	dt=_dt;
 	Accel_noise_mag=_Accel_noise_mag;
 	dist_thres=_dist_thres;
@@ -240,6 +249,14 @@ void CTracker::Update(vector<Point2d>& detections, const cv::Rect& roi)
 					if(seconds >= MIN_TIMEIN)
 					{
 						cout << "Luu vao database" << endl;
+						string strTimeIn = connectDb.convertTimeInOut(tracks[i]->timestart);
+						string strTimeOut = connectDb.convertTimeInOut(curr);
+						string strCamDate = connectDb.createCAM_DATE(curr);
+
+						string prefix_customer_cd =connectDb.createDateCustomerCd(tracks[i]->timestart);
+						string maKhachHang = connectDb.createFormatCustomerId(SHOP_CD, prefix_customer_cd, tracks[i]->track_id);
+
+						(this->connectDb).insert_TB_CAM_MARKET_CSMR(this->db, SHOP_CD, strCamDate, maKhachHang, strTimeIn, strTimeOut, seconds);
 					}
 				}
 

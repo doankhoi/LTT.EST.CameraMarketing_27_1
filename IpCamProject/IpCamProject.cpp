@@ -9,6 +9,7 @@
 #include "Tracker.h"
 #include "Detector.h"
 #include "Enviroment.h"
+#include "ConnectDB.h"
 using namespace std;
 
 int _tmain(int argc, _TCHAR* argv[])
@@ -29,7 +30,22 @@ int _tmain(int argc, _TCHAR* argv[])
 		Scalar(127,0,127)
 	};
 
-	VideoCapture capture("D:/Data/IpCam/Video/CLIP_20150115-140156.mp4");
+	//>>>Lấy đường dẫn database
+	sqlite3* db;
+	ConnectDB connect;
+	db = connect.connectDb("D:/Data/IpCam/database/ETSCameraClientCache.db3");
+	string url = connect.getCameraInfo(db);
+	if(url =="")
+	{
+		cout << "カメラ情報を設定してください。"<< endl;
+		return -1;
+	}
+
+	url = "D:/Data/IpCam/Video/CLIP_20150115-140156.mp4";
+
+	//<<<Lấy đường dẫn database
+
+	VideoCapture capture(url);
 
 	if(!capture.isOpened())
 	{

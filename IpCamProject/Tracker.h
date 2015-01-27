@@ -34,6 +34,7 @@ public:
 	//>>>Kết nối database
 	sqlite3* db;
 	ConnectDB connectDb;
+	string SHOP_CD;
 	//<<<Kết nối database
 
 	float dt; 
