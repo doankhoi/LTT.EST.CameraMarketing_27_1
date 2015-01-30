@@ -87,41 +87,27 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BackgroundSubtract.h" />
-    <ClInclude Include="Blob.h" />
-    <ClInclude Include="ColorHistogram.h" />
     <ClInclude Include="ConnectDB.h" />
-    <ClInclude Include="ContentFinder.h" />
     <ClInclude Include="Detector.h" />
     <ClInclude Include="Enviroment.h" />
     <ClInclude Include="G:\test_sqllite\sqlite\sqlite3.h" />
     <ClInclude Include="G:\test_sqllite\sqlite\sqlite3ext.h" />
     <ClInclude Include="HungarianAlg.h" />
-    <ClInclude Include="IpCam.h" />
     <ClInclude Include="Kalman.h" />
-    <ClInclude Include="MeanShift.h" />
-    <ClInclude Include="MeanShiftTracker.h" />
     <ClInclude Include="OpencvInclude.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Tracker.h" />
-    <ClInclude Include="Utils.h" />
     <ClInclude Include="VIBE.h" />
-    <ClInclude Include="watershedsegmenter.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BackgroundSubtract.cpp" />
-    <ClCompile Include="Blob.cpp" />
-    <ClCompile Include="ColorHistogram.cpp" />
     <ClCompile Include="ConnectDB.cpp" />
-    <ClCompile Include="ContentFinder.cpp" />
     <ClCompile Include="Detector.cpp" />
     <ClCompile Include="Enviroment.cpp" />
     <ClCompile Include="HungarianAlg.cpp" />
-    <ClCompile Include="IpCam.cpp" />
     <ClCompile Include="IpCamProject.cpp" />
     <ClCompile Include="Kalman.cpp" />
-    <ClCompile Include="MeanShift.cpp" />
-    <ClCompile Include="MeanShiftTracker.cpp" />
     <ClCompile Include="sqlite3.c">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </ExcludedFromBuild>
@@ -135,7 +121,6 @@
       <CompileAs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">CompileAsCpp</CompileAs>
     </ClCompile>
     <ClCompile Include="Tracker.cpp" />
-    <ClCompile Include="Utils.cpp" />
     <ClCompile Include="VIBE.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

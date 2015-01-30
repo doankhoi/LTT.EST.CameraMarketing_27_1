@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Tracker.h"
+#include "Enviroment.h"
 
 using namespace cv;
 using namespace std;
@@ -33,7 +34,7 @@ CTrack::~CTrack()
 CTracker::CTracker(float _dt, float _Accel_noise_mag, double _dist_thres, int _maximum_allowed_skipped_frames,int _max_trace_length)
 {
 	//>>>Kết nối database
-	db = (this->connectDb).connectDb("D:/Data/IpCam/database/ETSCameraClientCache.db3");
+	db = (this->connectDb).connectDb(PATH_DATABASE);
 	SHOP_CD = connectDb.getShopInfo(db);
 	if(SHOP_CD =="")
 	{
@@ -152,12 +153,21 @@ void CTracker::Update(vector<Point2d>& detections, const cv::Rect& roi)
 	}
 
 	// -----------------------------------
-	//Nếu theo vết bị mất trong một thời gian dài thì xóa đi 
+	//Nếu theo vết bị mất trong một thời gian dài thì xóa đi nếu nó
+	//không trong cửa hàng.
+	//Nếu trong cửa hàng vẫn giữ lại
 	// -----------------------------------
 	for(int i=0;i < tracks.size();i++)
 	{
 		if(tracks[i]->skipped_frames > maximum_allowed_skipped_frames)
 		{
+			if(isIn((tracks[i]->trace).back(), roi))//Nếu không trong cửa hàng
+			{
+				//Đẩy vào danh sách đối tượng đứng yên trong cửa hàng
+				tracks_static.push_back(tracks[i]);
+			}
+
+			//Xóa đối tượng khỏi danh sách theo vết
 			delete tracks[i];
 			tracks.erase(tracks.begin()+i);
 			assignment.erase(assignment.begin()+i);
@@ -174,7 +184,7 @@ void CTracker::Update(vector<Point2d>& detections, const cv::Rect& roi)
 	{
 		it = find(assignment.begin(), assignment.end(), i);
 
-		if(it==assignment.end())
+		if(it == assignment.end())
 		{
 			not_assigned_detections.push_back(i);
 		}
@@ -185,11 +195,46 @@ void CTracker::Update(vector<Point2d>& detections, const cv::Rect& roi)
 	// -----------------------------------
 	if(not_assigned_detections.size()!=0)
 	{
-		for(int i=0;i<not_assigned_detections.size();i++)
+		for(int i=0;i < not_assigned_detections.size();i++)
 		{
-			CTrack* tr=new CTrack(detections[not_assigned_detections[i]], dt, Accel_noise_mag);
+			
+			//>>>Kiểm tra xem có thể là đối tượng đứng yên chuyển động
+			if(tracks_static.size() > 0 && isIn(detections[not_assigned_detections[i]], roi))
+			{
+				double dist;
+				double min_dist= dist_thres;
+				int index_tracks_static = -1;
+				for(int k=0; k < tracks_static.size(); k++)
+				{
+					Point2d diff = (tracks_static[k]->prediction - detections[not_assigned_detections[i]]);
+					dist = sqrtf(diff.x*diff.x + diff.y*diff.y);
+					if(dist < min_dist)
+					{
+						min_dist = dist;
+						index_tracks_static = k;
+					}
+				}
+
+				if(min_dist < dist_thres && index_tracks_static != -1)//Trong ngưỡng cho phép
+				{
+					//Trường hợp đối tượng đứng yên di chuyển gán lại.
+					tracks_static[index_tracks_static]->skipped_frames =0;
+					tracks_static[index_tracks_static]->prediction = detections[not_assigned_detections[i]];
+					tracks.push_back(tracks_static[index_tracks_static]);
+					//Xóa khỏi xóa khỏi danh sách tracks_static
+					delete tracks_static[index_tracks_static];
+					tracks_static.erase(tracks_static.begin()+index_tracks_static);
+					//Xóa khỏi danh sách not_assigned_detections
+					not_assigned_detections.erase(not_assigned_detections.begin()+i);
+					i--;
+					continue;
+				}
+			}
+			//<<<Kiểm tra xem có thể là đối tượng đứng yên chuyển động
 
 			//Kiểm tra điểm phát hiện đối tượng lần đầu tiên có trong cửa hàng không
+			CTrack* tr=new CTrack(detections[not_assigned_detections[i]], dt, Accel_noise_mag);
+
 			if(isIn(detections[i], roi))
 			{
 				tr->is_calc_time = true;
@@ -215,11 +260,11 @@ void CTracker::Update(vector<Point2d>& detections, const cv::Rect& roi)
 		{
 			tracks[i]->skipped_frames = 0; //Đặt lại số khung bỏ qua về 0
 			tracks[i]->prediction = tracks[i]->KF->Update(detections[assignment[i]], 1); //Nếu phát hiện thì cập nhật bằng measurements
-		}else // Nếu đối tượng không liên tục thì dự đoán
+		} 
+		else // Nếu đối tượng không liên tục thì dự đoán
 		{
 			tracks[i]->prediction=tracks[i]->KF->Update(Point2f(0,0), 0);	
 		}
-
 
 		if(tracks[i]->trace.size() > 0)
 		{

@@ -45,7 +45,8 @@ public:
 	int maximum_allowed_skipped_frames; //Ngưỡng cho phép số khung hình mất vết
 	
 	int max_trace_length;
-	vector<CTrack*> tracks;
+	vector<CTrack*> tracks; //Lưu các đối tượng chuyển động
+	vector<CTrack*> tracks_static;//Lưu các đối tượng đứng yên tại khung hình trước
 
 	bool isIn(cv::Point2d center, const cv::Rect& roi);//Kiểm tra nằm trong cửa hàng
 	void Update(vector<Point2d>& detections, const cv::Rect& roi);//Cập nhật danh sách theo vết

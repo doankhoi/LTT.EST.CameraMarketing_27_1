@@ -12,6 +12,13 @@
 #include "ConnectDB.h"
 using namespace std;
 
+string intToString(int number) 
+{
+	stringstream ss;
+	ss << number;
+	return ss.str();
+}
+
 int _tmain(int argc, _TCHAR* argv[])
 {
 	/*IpCam ipCam;
@@ -33,7 +40,7 @@ int _tmain(int argc, _TCHAR* argv[])
 	//>>>Lấy đường dẫn database
 	sqlite3* db;
 	ConnectDB connect;
-	db = connect.connectDb("D:/Data/IpCam/database/ETSCameraClientCache.db3");
+	db = connect.connectDb(PATH_DATABASE);
 	string url = connect.getCameraInfo(db);
 	if(url =="")
 	{
@@ -106,6 +113,13 @@ int _tmain(int argc, _TCHAR* argv[])
 						line(frame,tracker.tracks[i]->trace[j],tracker.tracks[i]->trace[j+1],Colors[tracker.tracks[i]->track_id%9],2,CV_AA);
 					}
 				}
+			}
+
+			for(int j=0; j < tracker.tracks_static.size(); j++)
+			{
+				cv::Rect rect(tracker.tracks_static[j]->prediction.x-30,tracker.tracks_static[j]->prediction.y-30, 60, 60);
+				cv::putText(frame, "( "+ intToString(tracker.tracks_static[j]->track_id)+ ")", cv::Point(rect.x, rect.y), FONT_HERSHEY_PLAIN, 2, Scalar(0,255,0),1);
+				cv::rectangle(frame, rect, Scalar(255,0,0),1);
 			}
 		}
 
